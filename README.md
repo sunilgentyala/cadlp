@@ -1,6 +1,6 @@
 # CADLP: Context-Aware Data Loss Prevention Proxy for LLMs
 
-[![CI](https://github.com/sugentyala/cadlp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugentyala/cadlp/actions/workflows/ci.yml)
+[![CI](https://github.com/sunilgentyala/cadlp/actions/workflows/ci.yml/badge.svg)](https://github.com/sugentyala/cadlp/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 

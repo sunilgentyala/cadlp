@@ -13,7 +13,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, Tuple
 
 try:
     import click
@@ -22,8 +22,6 @@ except ImportError:
     _CLICK = False
 
 from cadlp.csc.pipeline import ContextualSensitivityClassifier
-from cadlp.policy.engine import Action, PolicyEngine
-from cadlp.upr.redaction import UtilityPreservingRedactor
 
 
 @dataclass

@@ -1,7 +1,6 @@
 """Unit tests for Stage 1: Fast-Path regex and entropy detection."""
 
-import pytest
-from cadlp.csc.stage1_fastpath import detect, shannon_entropy, SensitiveSpan
+from cadlp.csc.stage1_fastpath import detect, shannon_entropy
 
 
 # ── Entropy helpers ───────────────────────────────────────────────────────────

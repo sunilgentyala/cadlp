@@ -9,14 +9,11 @@ mappings for conversational consistency.
 from __future__ import annotations
 
 import hashlib
-import re
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
 from cadlp.csc.pipeline import SensitivityMap
-from cadlp.csc.stage1_fastpath import SensitiveSpan
-from cadlp.csc.stage3_ast import CodeBlock
 
 
 # ── Placeholder templates by entity type ─────────────────────────────────────
@@ -163,7 +160,6 @@ class UtilityPreservingRedactor:
             A RedactionResult with the sanitized prompt.
         """
         prompt = sensitivity_map.prompt
-        redacted = list(prompt)  # work on a character list for safe in-place edits
 
         # Collect all replacements: (start, end, replacement_text)
         replacements: List[Tuple[int, int, str]] = []
@@ -189,8 +185,6 @@ class UtilityPreservingRedactor:
             prompt_chars[start:end] = list(replacement)
 
         redacted_prompt = "".join(prompt_chars)
-
-        entity_types = list({r[2].split("_")[0].lstrip("[") for r in replacements})
 
         return RedactionResult(
             original_prompt=prompt,

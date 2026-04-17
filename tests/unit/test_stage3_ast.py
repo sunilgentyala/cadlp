@@ -1,6 +1,5 @@
 """Unit tests for Stage 3: Code IP fingerprinting."""
 
-import pytest
 from cadlp.csc.stage3_ast import detect, extract_code_blocks, _compute_ip_score
 
 

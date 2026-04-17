@@ -1,8 +1,7 @@
 """Unit tests for the full CSC pipeline and UPR redaction engine."""
 
-import pytest
-from cadlp.csc.pipeline import ContextualSensitivityClassifier, SensitivityMap
-from cadlp.upr.redaction import UtilityPreservingRedactor, SessionRedactionMap
+from cadlp.csc.pipeline import ContextualSensitivityClassifier
+from cadlp.upr.redaction import UtilityPreservingRedactor
 from cadlp.policy.engine import PolicyEngine, Action
 
 

@@ -13,7 +13,7 @@ import time
 from dataclasses import asdict, dataclass
 from typing import List, Optional
 
-from cadlp.policy.engine import Action, PolicyDecision
+from cadlp.policy.engine import PolicyDecision
 
 logger = logging.getLogger("cadlp.audit")
 

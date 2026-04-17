@@ -146,9 +146,8 @@ class TestCleanPrompt:
 
 class TestSessionConsistency:
     def test_same_entity_same_placeholder(self):
-        csc    = ContextualSensitivityClassifier()
-        upr    = UtilityPreservingRedactor()
-        policy = PolicyEngine()
+        csc = ContextualSensitivityClassifier()
+        upr = UtilityPreservingRedactor()
 
         p1 = "Please update the account for alice@company.com."
         p2 = "What is the last login date for alice@company.com?"

@@ -1,7 +1,6 @@
 """Unit tests for Stage 2: NER with operational/exemplary disambiguation."""
 
-import pytest
-from cadlp.csc.stage2_ner import detect, ContextLabel
+from cadlp.csc.stage2_ner import detect
 
 
 class TestNERDetection:

@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  cadlp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cadlp:latest
+    container_name: cadlp-proxy
+    environment:
+      - CADLP_LOG_LEVEL=INFO
+      - CADLP_IP_THRESHOLD=0.55
+      - CADLP_ENTROPY_THRESHOLD=4.5
+    volumes:
+      - ./data:/app/data:ro
+      - cadlp_audit:/app/audit_logs
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "from cadlp import ContextualSensitivityClassifier; ContextualSensitivityClassifier()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  cadlp-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cadlp:latest
+    container_name: cadlp-tests
+    command: pytest tests/ -v --tb=short
+    volumes:
+      - .:/app
+    profiles:
+      - test
+
+volumes:
+  cadlp_audit:
+    driver: local

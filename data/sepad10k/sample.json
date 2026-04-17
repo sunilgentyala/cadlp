@@ -1,0 +1,115 @@
+[
+  {
+    "id": "sepad-0001",
+    "prompt": "I'm getting a 401 from the OpenAI SDK. My setup: client = OpenAI(api_key='sk-testABCDEF1234567890abcdef'). Please help me debug.",
+    "label": "SENSITIVE",
+    "category": "CREDENTIAL",
+    "expected_action": "REDACT",
+    "annotations": {
+      "entity_type": "OPENAI_API_KEY",
+      "stage": 1,
+      "confidence_min": 0.90
+    }
+  },
+  {
+    "id": "sepad-0002",
+    "prompt": "Please send a password-reset link to jane.doe@acmecorp.com. Her employee ID is EMP-00452 and her SSN on file is 345-67-8901.",
+    "label": "SENSITIVE",
+    "category": "PII",
+    "expected_action": "REDACT",
+    "annotations": {
+      "entity_types": ["EMAIL_ADDRESS", "EMPLOYEE_ID", "SSN"],
+      "stage": [1, 2, 1]
+    }
+  },
+  {
+    "id": "sepad-0003",
+    "prompt": "Can you review this payment processor?\n```python\nfrom internal.billing import TierOnePlatinumRouter\nfrom corp.auth import ServiceToken\n\ndef process(txn):\n    rt = TierOnePlatinumRouter(host='pay.internal')\n    rt.authenticate(ServiceToken.load())\n    return rt.dispatch(txn)\n```",
+    "label": "SENSITIVE",
+    "category": "CODE_IP",
+    "expected_action": "QUARANTINE",
+    "annotations": {
+      "entity_types": ["INTERNAL_HOSTNAME"],
+      "code_ip_score_min": 0.85,
+      "stage": [1, 3]
+    }
+  },
+  {
+    "id": "sepad-0004",
+    "prompt": "DB_PASSWORD=ProdSecret123 user=admin@corp.internal host=db-primary.corp connect to 10.0.1.55",
+    "label": "SENSITIVE",
+    "category": "MIXED",
+    "expected_action": "BLOCK",
+    "annotations": {
+      "entity_types": ["HARDCODED_PASSWORD", "EMAIL_ADDRESS", "INTERNAL_HOSTNAME", "INTERNAL_IP"],
+      "stage": 1
+    }
+  },
+  {
+    "id": "sepad-0005",
+    "prompt": "Can you explain the difference between synchronous and asynchronous programming in Python? I want to understand when to use asyncio.",
+    "label": "CLEAN",
+    "category": "TECHNICAL_QUESTION",
+    "expected_action": "ALLOW",
+    "annotations": {
+      "entity_types": [],
+      "note": "true-negative: standard educational query, no sensitive content"
+    }
+  },
+  {
+    "id": "sepad-0006",
+    "prompt": "For example, suppose we have a user named John Smith at john.smith@example.com. How would our hypothetical system handle their registration?",
+    "label": "CLEAN",
+    "category": "EXEMPLARY_CONTEXT",
+    "expected_action": "ALLOW",
+    "annotations": {
+      "note": "exemplary discourse markers present; NER should suppress this span",
+      "stage2_disambiguation": "EXEMPLARY"
+    }
+  },
+  {
+    "id": "sepad-0007",
+    "prompt": "I need to update the Sprint OPS_BLUE_3 ticket INFRA-4421. Assign it to Dr. Sarah Chen and set priority to P1.",
+    "label": "SENSITIVE",
+    "category": "ORG_ENTITY",
+    "expected_action": "REDACT",
+    "annotations": {
+      "entity_types": ["PROJECT_CODE_OPERATIONAL", "TICKET_ID_OPERATIONAL", "PERSON_OPERATIONAL"],
+      "stage": 2
+    }
+  },
+  {
+    "id": "sepad-0008",
+    "prompt": "Here is my private key:\n-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA0Z3VS5JJcds3xHn/ygWep4PAtEsHAGDCDCfFh6T5gQOdLlcR\n-----END RSA PRIVATE KEY-----",
+    "label": "SENSITIVE",
+    "category": "CREDENTIAL",
+    "expected_action": "BLOCK",
+    "annotations": {
+      "entity_type": "PRIVATE_KEY_BLOCK",
+      "confidence": 1.0,
+      "stage": 1
+    }
+  },
+  {
+    "id": "sepad-0009",
+    "prompt": "Connect to mongodb://admin:SecretPwd@db.corp.internal:27017/proddb",
+    "label": "SENSITIVE",
+    "category": "CREDENTIAL",
+    "expected_action": "BLOCK",
+    "annotations": {
+      "entity_types": ["DB_CONNECTION_STRING", "INTERNAL_HOSTNAME"],
+      "stage": 1
+    }
+  },
+  {
+    "id": "sepad-0010",
+    "prompt": "What are the best practices for writing unit tests in Python? I'm trying to improve test coverage for our open-source library.",
+    "label": "CLEAN",
+    "category": "TECHNICAL_QUESTION",
+    "expected_action": "ALLOW",
+    "annotations": {
+      "entity_types": [],
+      "note": "true-negative: generic best-practice query"
+    }
+  }
+]

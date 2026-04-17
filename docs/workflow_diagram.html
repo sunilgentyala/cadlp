@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CADLP System Workflow</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+    h1 {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #7dd3fc;
+      margin-bottom: 6px;
+      letter-spacing: 0.05em;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin-bottom: 36px;
+    }
+
+    /* ── Main flow grid ─────────────────────────────────────── */
+    .flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+
+    /* Arrow */
+    .arrow {
+      width: 2px;
+      height: 28px;
+      background: linear-gradient(to bottom, #334155, #475569);
+      position: relative;
+    }
+    .arrow::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: -5px;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid #475569;
+    }
+
+    /* Node cards */
+    .node {
+      border-radius: 12px;
+      padding: 16px 24px;
+      width: 100%;
+      max-width: 640px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+      position: relative;
+    }
+    .node:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    .node .node-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .node .node-sub {
+      font-size: 0.78rem;
+      opacity: 0.75;
+      line-height: 1.5;
+    }
+    .node .badge {
+      position: absolute;
+      top: 10px;
+      right: 14px;
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* Colour themes per node */
+    .node-input    { background:#1e293b; border-color:#38bdf8; }
+    .node-input    .node-title { color:#38bdf8; }
+    .node-input    .badge { background:#0c4a6e; color:#7dd3fc; }
+
+    .node-stage1   { background:#1a1f2e; border-color:#6366f1; }
+    .node-stage1   .node-title { color:#a5b4fc; }
+    .node-stage1   .badge { background:#312e81; color:#c7d2fe; }
+
+    .node-stage2   { background:#1a1f2e; border-color:#8b5cf6; }
+    .node-stage2   .node-title { color:#c4b5fd; }
+    .node-stage2   .badge { background:#4c1d95; color:#ddd6fe; }
+
+    .node-stage3   { background:#1a1f2e; border-color:#ec4899; }
+    .node-stage3   .node-title { color:#f9a8d4; }
+    .node-stage3   .badge { background:#831843; color:#fbcfe8; }
+
+    .node-stage4   { background:#1a1f2e; border-color:#f59e0b; }
+    .node-stage4   .node-title { color:#fcd34d; }
+    .node-stage4   .badge { background:#78350f; color:#fde68a; }
+
+    .node-policy   { background:#1a2e1e; border-color:#22c55e; }
+    .node-policy   .node-title { color:#86efac; }
+    .node-policy   .badge { background:#14532d; color:#bbf7d0; }
+
+    .node-upr      { background:#1a2432; border-color:#0ea5e9; }
+    .node-upr      .node-title { color:#7dd3fc; }
+    .node-upr      .badge { background:#0c4a6e; color:#bae6fd; }
+
+    .node-audit    { background:#2a1f1a; border-color:#f97316; }
+    .node-audit    .node-title { color:#fdba74; }
+    .node-audit    .badge { background:#7c2d12; color:#fed7aa; }
+
+    .node-output   { background:#1a2e1e; border-color:#4ade80; }
+    .node-output   .node-title { color:#4ade80; }
+    .node-output   .badge { background:#14532d; color:#86efac; }
+
+    /* ── Policy fork ───────────────────────────────────────── */
+    .fork {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 720px;
+      justify-content: center;
+    }
+    .fork-item {
+      flex: 1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 1px solid;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .fork-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+    }
+    .fork-allow   { background:#052e16; border-color:#22c55e; color:#86efac; }
+    .fork-redact  { background:#0c4a6e; border-color:#38bdf8; color:#7dd3fc; }
+    .fork-block   { background:#450a0a; border-color:#ef4444; color:#fca5a5; }
+    .fork-quarant { background:#1c1917; border-color:#f59e0b; color:#fcd34d; }
+    .fork-audit   { background:#1e1b4b; border-color:#818cf8; color:#c7d2fe; }
+
+    /* ── Detail panel ──────────────────────────────────────── */
+    .panel {
+      position: fixed;
+      right: 0; top: 0; bottom: 0;
+      width: 340px;
+      background: #1e293b;
+      border-left: 1px solid #334155;
+      padding: 28px 22px;
+      transform: translateX(100%);
+      transition: transform 0.25s ease;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .panel.open { transform: translateX(0); }
+    .panel h2 { font-size: 1rem; font-weight: 700; color: #7dd3fc; margin-bottom: 12px; }
+    .panel p { font-size: 0.82rem; line-height: 1.6; color: #94a3b8; margin-bottom: 10px; }
+    .panel ul { padding-left: 18px; font-size: 0.82rem; color: #94a3b8; line-height: 1.7; }
+    .panel .close-btn {
+      position: absolute; top: 12px; right: 14px;
+      background: none; border: none; color: #64748b;
+      font-size: 1.2rem; cursor: pointer;
+    }
+    .panel .close-btn:hover { color: #e2e8f0; }
+    .panel .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      margin: 2px 2px 8px;
+      background: #0f172a;
+      border: 1px solid #475569;
+      color: #cbd5e1;
+    }
+
+    /* ── CSC inner layout ─────────────────────────────────── */
+    .csc-wrapper {
+      width: 100%;
+      max-width: 640px;
+      border: 1px solid #334155;
+      border-radius: 14px;
+      padding: 16px;
+      background: #161b2a;
+    }
+    .csc-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .csc-stages {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .stage-inner {
+      border-radius: 8px;
+      padding: 10px 14px;
+      border: 1px solid;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .stage-inner:hover { transform: translateX(4px); box-shadow: 0 4px 16px rgba(0,0,0,0.3); }
+    .stage-inner .s-title { font-size: 0.83rem; font-weight: 700; margin-bottom: 2px; }
+    .stage-inner .s-sub   { font-size: 0.73rem; opacity: 0.7; }
+
+    /* Legend */
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 36px;
+      max-width: 700px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .legend-item {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.72rem; color: #64748b;
+    }
+    .legend-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+  </style>
+</head>
+<body>
+
+<h1>CADLP System Workflow</h1>
+<p class="subtitle">Context-Aware Data Loss Prevention Proxy for LLMs &mdash; click any node for details</p>
+
+<div class="flow">
+
+  <!-- Input -->
+  <div class="node node-input" onclick="showPanel('input')">
+    <div class="badge">Entry Point</div>
+    <div class="node-title">Enterprise Prompt</div>
+    <div class="node-sub">Raw user prompt intercepted before forwarding to LLM API &mdash; credentials, PII, code, or internal context may be present</div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- CSC block -->
+  <div class="csc-wrapper">
+    <div class="csc-title">Contextual Sensitivity Classifier (CSC)</div>
+    <div class="csc-stages">
+      <div class="stage-inner node-stage1" onclick="showPanel('s1')">
+        <div class="s-title" style="color:#a5b4fc">Stage 1 &mdash; Regex + Shannon Entropy</div>
+        <div class="s-sub">22 compiled patterns &middot; API keys, SSN, credit cards, tokens, hostnames &middot; entropy threshold 4.5 bits/char</div>
+      </div>
+      <div class="stage-inner node-stage2" onclick="showPanel('s2')">
+        <div class="s-title" style="color:#c4b5fd">Stage 2 &mdash; NER + Disambiguation</div>
+        <div class="s-sub">Person, Org, Project Code, Ticket ID &middot; OPERATIONAL vs. EXEMPLARY context labels</div>
+      </div>
+      <div class="stage-inner node-stage3" onclick="showPanel('s3')">
+        <div class="s-title" style="color:#f9a8d4">Stage 3 &mdash; AST Code IP Fingerprinting</div>
+        <div class="s-sub">Python AST features &middot; internal import heuristics &middot; identifier entropy &middot; IP score [0, 1]</div>
+      </div>
+      <div class="stage-inner node-stage4" onclick="showPanel('s4')">
+        <div class="s-title" style="color:#fcd34d">Stage 4 &mdash; Semantic / KB Similarity</div>
+        <div class="s-sub">TF-IDF cosine similarity against internal KB &middot; internal term density heuristic</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- SensitivityMap -->
+  <div class="node node-policy" onclick="showPanel('smap')" style="border-color:#4ade80">
+    <div class="badge" style="background:#14532d;color:#86efac">Aggregation</div>
+    <div class="node-title" style="color:#4ade80">SensitivityMap</div>
+    <div class="node-sub">Merged span list with entity types, confidence scores, and IP-flagged code blocks</div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- Policy Engine -->
+  <div class="node node-policy" onclick="showPanel('policy')">
+    <div class="badge">Rule Engine</div>
+    <div class="node-title">Policy Engine</div>
+    <div class="node-sub">Six configurable rules evaluated in priority order &mdash; first match wins</div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- Fork -->
+  <div class="fork">
+    <div class="fork-item fork-allow" onclick="showPanel('allow')">ALLOW</div>
+    <div class="fork-item fork-redact" onclick="showPanel('redact')">REDACT</div>
+    <div class="fork-item fork-block" onclick="showPanel('block')">BLOCK</div>
+    <div class="fork-item fork-quarant" onclick="showPanel('quarantine')">QUARANTINE</div>
+    <div class="fork-item fork-audit" onclick="showPanel('audit_action')">AUDIT</div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- UPR -->
+  <div class="node node-upr" onclick="showPanel('upr')">
+    <div class="badge">REDACT path</div>
+    <div class="node-title">Utility-Preserving Redactor (UPR)</div>
+    <div class="node-sub">Typed placeholders [EMAIL_1], [API_KEY_1], [PERSON_A] &middot; session-level redaction map for multi-turn consistency</div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- Audit -->
+  <div class="node node-audit" onclick="showPanel('audit')">
+    <div class="badge">All paths</div>
+    <div class="node-title">Zero-Retention Audit Logger</div>
+    <div class="node-sub">Logs entity types, action taken, timestamp, confidence &mdash; never the raw prompt &middot; CEF / JSON export</div>
+  </div>
+
+  <div class="arrow"></div>
+
+  <!-- Output -->
+  <div class="node node-output" onclick="showPanel('output')">
+    <div class="badge">Exit Point</div>
+    <div class="node-title">Sanitised Prompt &rarr; LLM API</div>
+    <div class="node-sub">Redacted prompt forwarded to upstream LLM &middot; BLOCK / QUARANTINE paths return error to client</div>
+  </div>
+
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>Stage 1 (Regex)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#8b5cf6"></div>Stage 2 (NER)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>Stage 3 (AST)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f59e0b"></div>Stage 4 (Semantic)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>Policy / Safe</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Block / Threat</div>
+</div>
+
+<!-- Detail Panel -->
+<div class="panel" id="panel">
+  <button class="close-btn" onclick="closePanel()">&#x2715;</button>
+  <h2 id="panel-title"></h2>
+  <div id="panel-body"></div>
+</div>
+
+<script>
+const details = {
+  input: {
+    title: "Enterprise Prompt (Entry Point)",
+    body: `<p>Every prompt submitted by an enterprise user is intercepted by CADLP before it reaches any external LLM API endpoint. The raw text may contain:</p>
+    <ul>
+      <li>API credentials or secrets pasted from code editors</li>
+      <li>PII such as email addresses, SSNs, or employee IDs</li>
+      <li>Proprietary source code with internal import paths</li>
+      <li>Internal hostnames, IP ranges, or project codenames</li>
+    </ul>
+    <p>No content modification occurs at this stage; the prompt enters the CSC pipeline unaltered.</p>`
+  },
+  s1: {
+    title: "Stage 1: Regex + Shannon Entropy",
+    body: `<p>The fastest stage in the pipeline. Applies 22 compiled regular expressions covering:</p>
+    <span class="tag">OPENAI_API_KEY</span><span class="tag">ANTHROPIC_API_KEY</span><span class="tag">GITHUB_TOKEN</span>
+    <span class="tag">JWT_TOKEN</span><span class="tag">PRIVATE_KEY_BLOCK</span><span class="tag">DB_CONNECTION_STRING</span>
+    <span class="tag">EMAIL_ADDRESS</span><span class="tag">SSN</span><span class="tag">CREDIT_CARD</span>
+    <span class="tag">INTERNAL_HOSTNAME</span><span class="tag">INTERNAL_IP</span><span class="tag">HARDCODED_PASSWORD</span>
+    <p>A secondary entropy pass tokenises the prompt and flags any token longer than 16 characters with Shannon entropy above 4.5 bits/char as a potential secret. Confidence is normalised linearly from the entropy score.</p>
+    <p>Overlapping spans are deduplicated by keeping the higher-confidence match.</p>`
+  },
+  s2: {
+    title: "Stage 2: NER + Operational Disambiguation",
+    body: `<p>Runs heuristic named-entity recognition over tokens not already covered by Stage 1 spans. Detects:</p>
+    <ul>
+      <li><strong>PERSON</strong>: Title + Name patterns (Mr., Dr., Prof.)</li>
+      <li><strong>ORGANIZATION</strong>: Entities ending in Inc., Corp., LLC, Group</li>
+      <li><strong>PROJECT_CODE</strong>: ALL_CAPS identifiers like OPS_BLUE_3</li>
+      <li><strong>EMPLOYEE_ID</strong>: EMP-XXXXX patterns</li>
+      <li><strong>TICKET_ID</strong>: PROJ-NNNNN patterns</li>
+    </ul>
+    <p>Each detected entity is passed to a context-window disambiguator that measures exemplary markers ("e.g.", "suppose", "hypothetically") and action verbs ("insert", "send", "update"). Entities in clearly exemplary discourse are suppressed; only OPERATIONAL and UNCERTAIN entities are emitted as spans.</p>`
+  },
+  s3: {
+    title: "Stage 3: AST Code IP Fingerprinting",
+    body: `<p>Extracts fenced code blocks from the prompt. For Python blocks, a full AST walk computes:</p>
+    <ul>
+      <li>Function and class count</li>
+      <li>Import names (filtered against a public package allowlist)</li>
+      <li>Identifier entropy (Shannon entropy over all identifier tokens)</li>
+      <li>Cyclomatic complexity estimate</li>
+    </ul>
+    <p>Hard-positive signals (internal import paths like <code>internal.billing</code>, or internal hostnames like <code>pay.internal</code>) lock the IP score at 0.85-0.90 and cannot be overridden by soft heuristics. Unknown imports and high identifier entropy provide further boosts. Non-Python code uses token-level heuristics only.</p>`
+  },
+  s4: {
+    title: "Stage 4: Semantic / KB Similarity",
+    body: `<p>Compares the prompt against an Organizational Knowledge Base (KB) using TF-IDF cosine similarity. In the production configuration, this KB is populated from internal documentation, project wikis, and anonymised incident reports.</p>
+    <p>A secondary internal-term density check counts how many tokens in the prompt appear in a configured internal-terminology lexicon. High density triggers a semantic sensitivity flag even without a direct KB match.</p>
+    <p>This stage is optional: if the KB is empty, it returns no spans and does not affect the pipeline result.</p>`
+  },
+  smap: {
+    title: "SensitivityMap",
+    body: `<p>The output of the CSC pipeline. Aggregates all spans from Stages 1-4 and any flagged code blocks from Stage 3. Provides:</p>
+    <ul>
+      <li><code>is_sensitive</code>: True if any span or flagged code block exists</li>
+      <li><code>spans</code>: Deduplicated list of SensitiveSpan objects</li>
+      <li><code>code_blocks</code>: Code blocks with IP scores above threshold</li>
+      <li><code>entity_types</code>: Unique set of detected entity type strings</li>
+      <li><code>highest_confidence</code>: Maximum confidence across all spans</li>
+    </ul>`
+  },
+  policy: {
+    title: "Policy Engine",
+    body: `<p>Evaluates six ordered rules against the SensitivityMap. The first matching rule determines the action.</p>
+    <ul>
+      <li><strong>block_credentials</strong>: BLOCK on API keys, private keys, DB connection strings</li>
+      <li><strong>redact_pii</strong>: REDACT on email, SSN, credit card, phone</li>
+      <li><strong>redact_infrastructure</strong>: REDACT on internal hostnames, IPs</li>
+      <li><strong>redact_secrets</strong>: REDACT on passwords, env secrets, bearer tokens</li>
+      <li><strong>quarantine_code_ip</strong>: QUARANTINE on code blocks with IP score &ge; threshold</li>
+      <li><strong>redact_org_entities</strong>: REDACT on NER-detected operational entities</li>
+    </ul>
+    <p>Rules are independently configurable; enterprise deployments can adjust thresholds, add custom rules, or change action types per entity category.</p>`
+  },
+  allow: {
+    title: "Action: ALLOW",
+    body: `<p>No sensitive entity or code block was detected. The prompt passes through unmodified to the upstream LLM API.</p>
+    <p>The audit logger still records a pass-through event with metadata (no prompt content stored).</p>`
+  },
+  redact: {
+    title: "Action: REDACT",
+    body: `<p>One or more sensitive spans were detected and a matching rule specifies REDACT. The prompt is passed to the Utility-Preserving Redactor before forwarding to the LLM.</p>
+    <p>Redacted spans are replaced with typed, indexed placeholders. The original values are not logged.</p>`
+  },
+  block: {
+    title: "Action: BLOCK",
+    body: `<p>A high-confidence credential (API key, private key, database connection string) was detected. The prompt is rejected and not forwarded to the LLM.</p>
+    <p>An error response is returned to the client. The block event is recorded in the audit log.</p>`
+  },
+  quarantine: {
+    title: "Action: QUARANTINE",
+    body: `<p>A code block with an IP score at or above the configured threshold was detected. The prompt is placed in a quarantine queue for human review.</p>
+    <p>This action is appropriate for situations where automated redaction would destroy too much utility (e.g., entire function bodies containing internal logic). A reviewer determines whether to allow, redact, or permanently block the prompt.</p>`
+  },
+  audit_action: {
+    title: "Action: AUDIT",
+    body: `<p>An AUDIT action records the event in the audit log for compliance purposes but does not block or modify the prompt. Typically used for lower-severity detections (e.g., uncertain NER spans) where blocking or redacting would create too many false positives during an initial deployment phase.</p>`
+  },
+  upr: {
+    title: "Utility-Preserving Redactor (UPR)",
+    body: `<p>Replaces each sensitive span with a typed, indexed placeholder that preserves the semantic structure of the prompt:</p>
+    <ul>
+      <li><code>[EMAIL_1]</code>, <code>[EMAIL_2]</code> for email addresses</li>
+      <li><code>[API_KEY_1]</code> for API credentials</li>
+      <li><code>[SSN_1]</code> for Social Security numbers</li>
+      <li><code>[PERSON_A]</code>, <code>[PERSON_B]</code> for named individuals</li>
+      <li><code>[INTERNAL_HOST_1]</code> for infrastructure hostnames</li>
+    </ul>
+    <p>A session-level redaction map ensures the same real-world entity always maps to the same placeholder within a multi-turn conversation, maintaining referential consistency across turns.</p>`
+  },
+  audit: {
+    title: "Zero-Retention Audit Logger",
+    body: `<p>Logs a structured event for every prompt processed. Records only:</p>
+    <ul>
+      <li>Timestamp and session ID</li>
+      <li>Detected entity types and confidence scores</li>
+      <li>Policy action taken and triggered rule name</li>
+      <li>Redaction count (number of spans replaced)</li>
+    </ul>
+    <p>The raw prompt and redacted values are <strong>never</strong> persisted. Logs are exportable in CEF (Common Event Format) and JSON. This design satisfies most enterprise data-minimisation requirements under GDPR and CCPA.</p>`
+  },
+  output: {
+    title: "Sanitised Prompt Output",
+    body: `<p>For ALLOW and REDACT paths, the (possibly redacted) prompt is forwarded to the upstream LLM API. The LLM response is returned to the client normally.</p>
+    <p>For BLOCK and QUARANTINE paths, a structured error response is returned to the client instead. BLOCK responses indicate the specific entity type that triggered the block; QUARANTINE responses indicate the review is pending.</p>
+    <p>The Task Degradation Score (TDS) metric measures how much the redaction degrades downstream LLM utility, computed using BERTScore against responses from the un-redacted prompt on a held-out evaluation set.</p>`
+  }
+};
+
+function showPanel(key) {
+  const d = details[key];
+  if (!d) return;
+  document.getElementById('panel-title').textContent = d.title;
+  document.getElementById('panel-body').innerHTML = d.body;
+  document.getElementById('panel').classList.add('open');
+}
+function closePanel() {
+  document.getElementById('panel').classList.remove('open');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+</script>
+</body>
+</html>

@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CADLP | Context-Aware Data Loss Prevention for LLMs</title>
-<meta name="description" content="CADLP is an open-source proxy layer that intercepts, classifies, and redacts sensitive enterprise data before it reaches LLM APIs. Reference implementation for the published IEEE paper on Contextual Sensitivity Classification.">
+<meta name="description" content="CADLP is an open-source proxy layer that intercepts, classifies, and redacts sensitive enterprise data before it reaches LLM APIs. Reference implementation for the published IEEE ICIRCA 2026 paper.">
+<meta property="og:title" content="CADLP — Context-Aware DLP for LLMs">
+<meta property="og:description" content="Open-source proxy that detects and redacts sensitive enterprise data before it reaches LLM APIs. Published IEEE ICIRCA 2026.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://sunilgentyala.github.io/cadlp/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%230b0f14'/><path d='M32 8 L52 16 L52 32 C52 44 32 56 32 56 C32 56 12 44 12 32 L12 16 Z' fill='none' stroke='%237c9eff' stroke-width='3'/><rect x='22' y='28' width='20' height='14' rx='2' fill='%237c9eff' opacity='0.3'/><rect x='22' y='28' width='20' height='14' rx='2' fill='none' stroke='%237c9eff' stroke-width='1.5'/><circle cx='32' cy='33' r='2.5' fill='%237c9eff'/><line x1='32' y1='35.5' x2='32' y2='39' stroke='%237c9eff' stroke-width='1.5'/><path d='M26 28 L26 24 C26 20.7 29 18 32 18 C35 18 38 20.7 38 24 L38 28' fill='none' stroke='%237c9eff' stroke-width='2'/></svg>">
 <style>
   :root {
     --bg: #0b0f14;
@@ -15,6 +20,7 @@
     --muted: #9aa7b4;
     --accent: #7c9eff;
     --accent-2: #4fd1c5;
+    --accent-glow: rgba(124,158,255,0.18);
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
@@ -29,238 +35,421 @@
   a:hover { text-decoration: underline; }
   .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
 
+  /* ── HERO ── */
   header.hero {
-    padding: 90px 0 60px;
-    background: radial-gradient(circle at 20% 20%, rgba(124,158,255,0.12), transparent 45%),
-                radial-gradient(circle at 80% 0%, rgba(79,209,197,0.10), transparent 40%);
+    padding: 80px 0 60px;
+    background:
+      radial-gradient(ellipse 60% 50% at 15% 30%, rgba(124,158,255,0.13), transparent),
+      radial-gradient(ellipse 40% 40% at 85% 10%, rgba(79,209,197,0.09), transparent);
     border-bottom: 1px solid var(--border);
   }
+  .hero-inner { display: flex; align-items: center; gap: 48px; flex-wrap: wrap; }
+  .hero-text { flex: 1; min-width: 280px; }
+
+  /* ── LOGO ── */
+  .logo-wrap {
+    flex-shrink: 0;
+    width: 160px;
+    height: 160px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .logo-wrap svg { width: 160px; height: 160px; }
+
   .eyebrow {
     display: inline-block;
-    font-size: 12px;
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    letter-spacing: 0.09em;
     text-transform: uppercase;
     color: var(--accent);
-    border: 1px solid rgba(124,158,255,0.4);
-    padding: 4px 10px;
+    border: 1px solid rgba(124,158,255,0.35);
+    padding: 4px 11px;
     border-radius: 999px;
     margin-bottom: 18px;
   }
-  h1 { font-size: 2.6rem; margin: 0 0 14px; line-height: 1.15; }
+  h1 { font-size: 2.5rem; margin: 0 0 14px; line-height: 1.15; }
   h1 span { color: var(--accent); }
-  .lede { font-size: 1.15rem; color: var(--muted); max-width: 720px; margin: 0 0 30px; }
+  .lede { font-size: 1.1rem; color: var(--muted); max-width: 640px; margin: 0 0 28px; }
   .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
-  .btn { display: inline-block; padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
-  .btn-primary { background: var(--accent); color: #07101f; }
-  .btn-primary:hover { background: #9cb4ff; text-decoration: none; }
+  .btn { display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: 600; font-size: 0.93rem; }
+  .btn-primary { background: var(--accent); color: #070e1f; }
+  .btn-primary:hover { background: #9ab3ff; text-decoration: none; }
   .btn-secondary { border: 1px solid var(--border); color: var(--text); }
   .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
 
-  section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  /* ── SECTIONS ── */
+  section { padding: 52px 0; border-bottom: 1px solid var(--border); }
   section:last-of-type { border-bottom: none; }
-  h2 { font-size: 1.6rem; margin: 0 0 10px; }
-  .section-sub { color: var(--muted); margin: 0 0 30px; max-width: 700px; }
+  h2 { font-size: 1.55rem; margin: 0 0 10px; }
+  .section-sub { color: var(--muted); margin: 0 0 28px; max-width: 680px; }
 
-  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  @media (max-width: 700px) { .grid, .grid-3 { grid-template-columns: 1fr; } }
+  /* ── PIPELINE DIAGRAM ── */
+  .pipeline {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    overflow-x: auto;
+  }
+  .pipeline svg { display: block; min-width: 560px; }
 
+  /* ── GRIDS ── */
+  .grid   { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 14px; }
+  @media (max-width: 800px) { .grid-3, .grid-4 { grid-template-columns: repeat(2,1fr); } }
+  @media (max-width: 600px) { .grid, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+  /* ── CARDS ── */
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
-  .card h3 { margin: 0 0 8px; font-size: 1.02rem; color: var(--text); }
-  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+  .card h3 { margin: 0 0 8px; font-size: 1rem; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
 
   .stat { text-align: center; }
-  .stat .num { font-size: 2.1rem; font-weight: 700; color: var(--accent); }
-  .stat .label { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+  .stat .num { font-size: 1.9rem; font-weight: 700; color: var(--accent); }
+  .stat .label { color: var(--muted); font-size: 0.83rem; margin-top: 6px; }
 
-  .why-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  /* ── STAGE CARDS ── */
+  .stage-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: var(--accent-glow); border: 1px solid var(--accent);
+    font-size: 0.75rem; font-weight: 700; color: var(--accent); flex-shrink: 0;
+  }
+
+  /* ── WHY LIST ── */
+  .why-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
   .why-list li {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 8px;
-    padding: 16px 18px;
-    color: var(--muted);
+    background: var(--card); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent); border-radius: 8px;
+    padding: 14px 18px; color: var(--muted); font-size: 0.95rem;
   }
   .why-list li strong { color: var(--text); }
 
+  /* ── CODE ── */
   pre {
-    background: var(--bg-alt);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 18px;
-    overflow-x: auto;
-    font-size: 0.82rem;
-    color: #c8d3dd;
+    background: var(--bg-alt); border: 1px solid var(--border);
+    border-radius: 10px; padding: 18px; overflow-x: auto;
+    font-size: 0.82rem; color: #c8d3dd; margin: 0;
   }
   code {
-    background: rgba(124,158,255,0.12);
-    color: var(--accent);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.88em;
+    background: rgba(124,158,255,0.12); color: var(--accent);
+    padding: 2px 6px; border-radius: 4px; font-size: 0.86em;
   }
   pre code { background: none; padding: 0; color: inherit; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  /* ── TABLE ── */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
-  th { color: var(--accent); font-weight: 600; }
+  th { color: var(--accent); font-weight: 600; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
   td { color: var(--muted); }
-  td:first-child, th:first-child { color: var(--text); }
+  td:first-child { color: var(--text); }
 
+  /* ── CITE ── */
   .cite {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 20px;
-    font-size: 0.9rem;
-    color: var(--muted);
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 22px 24px;
+    font-size: 0.9rem; color: var(--muted); line-height: 1.7;
   }
 
-  footer { padding: 40px 0 60px; color: var(--muted); font-size: 0.85rem; }
+  footer {
+    padding: 36px 0 56px; color: var(--muted); font-size: 0.83rem;
+    border-top: 1px solid var(--border);
+  }
   footer a { color: var(--muted); }
   footer a:hover { color: var(--accent); }
+  .footer-inner { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+  .footer-logo { width: 28px; height: 28px; flex-shrink: 0; }
 </style>
 </head>
 <body>
 
+<!-- ═══════════════════════ HERO ═══════════════════════ -->
 <header class="hero">
   <div class="wrap">
-    <span class="eyebrow">Published &middot; IEEE ICIRCA 2026 &middot; IEEE Xplore</span>
-    <h1>Stop sensitive data from reaching <span>LLM APIs</span></h1>
-    <p class="lede">
-      CADLP is an open-source, research-grade proxy layer that intercepts prompts sent to
-      large language model APIs and detects, classifies, and redacts sensitive enterprise data
-      before it leaves the organization. Four-stage detection pipeline, zero-retention audit
-      logging, utility-preserving redaction.
-    </p>
-    <div class="btn-row">
-      <a class="btn btn-primary" href="https://github.com/sunilgentyala/cadlp">View on GitHub</a>
-      <a class="btn btn-secondary" href="https://ieeexplore.ieee.org/abstract/document/11570292">IEEE Xplore</a>
+    <div class="hero-inner">
+
+      <!-- Logo -->
+      <div class="logo-wrap">
+        <svg viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="CADLP logo">
+          <!-- glow ring -->
+          <circle cx="80" cy="80" r="72" fill="rgba(124,158,255,0.06)" stroke="rgba(124,158,255,0.15)" stroke-width="1"/>
+          <!-- shield body -->
+          <path d="M80 20 L118 36 L118 72 C118 100 80 124 80 124 C80 124 42 100 42 72 L42 36 Z"
+                fill="rgba(124,158,255,0.08)" stroke="#7c9eff" stroke-width="2.5" stroke-linejoin="round"/>
+          <!-- lock body -->
+          <rect x="63" y="72" width="34" height="26" rx="4"
+                fill="rgba(124,158,255,0.2)" stroke="#7c9eff" stroke-width="2"/>
+          <!-- lock shackle -->
+          <path d="M68 72 L68 63 C68 55.3 74.3 49 82 49 C89.7 49 96 55.3 96 63 L96 72"
+                fill="none" stroke="#7c9eff" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- keyhole -->
+          <circle cx="80" cy="82" r="4" fill="#7c9eff"/>
+          <rect x="78" y="84" width="4" height="7" rx="1" fill="#7c9eff"/>
+          <!-- data dots flowing left into shield -->
+          <circle cx="18" cy="76" r="3" fill="#4fd1c5" opacity="0.9"/>
+          <circle cx="28" cy="68" r="2.5" fill="#4fd1c5" opacity="0.65"/>
+          <circle cx="28" cy="84" r="2.5" fill="#4fd1c5" opacity="0.65"/>
+          <!-- redacted X flowing right out -->
+          <line x1="134" y1="68" x2="144" y2="78" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+          <line x1="144" y1="68" x2="134" y2="78" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round" opacity="0.85"/>
+          <!-- label -->
+          <text x="80" y="148" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif"
+                font-size="13" font-weight="700" letter-spacing="3" fill="#7c9eff">CADLP</text>
+        </svg>
+      </div>
+
+      <!-- Text -->
+      <div class="hero-text">
+        <span class="eyebrow">Published &middot; IEEE ICIRCA 2026 &middot; IEEE Xplore</span>
+        <h1>Stop sensitive data from reaching <span>LLM APIs</span></h1>
+        <p class="lede">
+          CADLP is an open-source proxy layer that intercepts prompts sent to LLM APIs
+          and detects, classifies, and redacts sensitive enterprise data before it leaves
+          the organization. Four-stage pipeline, zero-retention audit logging,
+          utility-preserving redaction.
+        </p>
+        <div class="btn-row">
+          <a class="btn btn-primary" href="https://github.com/sunilgentyala/cadlp">View on GitHub</a>
+          <a class="btn btn-secondary" href="https://ieeexplore.ieee.org/abstract/document/11570292">IEEE Xplore</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </header>
 
-<section id="results">
+<!-- ═══════════════════════ STATS ═══════════════════════ -->
+<section id="stats">
   <div class="wrap">
-    <div class="grid-3">
+    <div class="grid-4">
       <div class="card stat">
-        <div class="num">4-stage</div>
-        <div class="label">detection pipeline: regex, NER, AST code analysis, semantic similarity</div>
+        <div class="num">4</div>
+        <div class="label">detection stages in cascade pipeline</div>
       </div>
       <div class="card stat">
-        <div class="num">0 retention</div>
-        <div class="label">raw prompt content never persisted in audit logs</div>
+        <div class="num">0</div>
+        <div class="label">raw prompt content retained in audit logs</div>
       </div>
       <div class="card stat">
         <div class="num">UPR</div>
-        <div class="label">utility-preserving redaction keeps prompt structure intact for LLMs</div>
+        <div class="label">utility-preserving redaction keeps prompts useful</div>
+      </div>
+      <div class="card stat">
+        <div class="num">90</div>
+        <div class="label">tests across unit and integration suites</div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ═══════════════════════ PIPELINE DIAGRAM ═══════════════════════ -->
+<section id="architecture">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="section-sub">
+      The Contextual Sensitivity Classifier (CSC) runs four stages in cascade. Each stage
+      emits a SensitivityMap that drives the Policy Engine, which issues an ALLOW, REDACT,
+      BLOCK, or QUARANTINE decision before the prompt reaches the LLM API.
+    </p>
+
+    <!-- SVG pipeline diagram -->
+    <div class="pipeline">
+      <svg viewBox="0 0 700 170" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L0,6 L8,3 z" fill="#9aa7b4"/>
+          </marker>
+        </defs>
+
+        <!-- Prompt input box -->
+        <rect x="4" y="60" width="90" height="50" rx="7" fill="#151b23" stroke="#232b35" stroke-width="1.5"/>
+        <text x="49" y="82" text-anchor="middle" fill="#e6edf3" font-size="11" font-family="sans-serif" font-weight="600">Prompt</text>
+        <text x="49" y="97" text-anchor="middle" fill="#9aa7b4" font-size="10" font-family="sans-serif">Input</text>
+
+        <!-- arrow -->
+        <line x1="95" y1="85" x2="116" y2="85" stroke="#9aa7b4" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Stage 1 -->
+        <rect x="118" y="50" width="110" height="70" rx="7" fill="#151b23" stroke="#7c9eff" stroke-width="1.5"/>
+        <text x="173" y="70" text-anchor="middle" fill="#7c9eff" font-size="9.5" font-family="sans-serif" font-weight="700" letter-spacing="0.05em">STAGE 1</text>
+        <text x="173" y="86" text-anchor="middle" fill="#e6edf3" font-size="10.5" font-family="sans-serif" font-weight="600">Regex + Entropy</text>
+        <text x="173" y="100" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">Fast path</text>
+        <text x="173" y="112" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">credentials / PII</text>
+
+        <!-- arrow -->
+        <line x1="229" y1="85" x2="250" y2="85" stroke="#9aa7b4" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Stage 2 -->
+        <rect x="252" y="50" width="110" height="70" rx="7" fill="#151b23" stroke="#7c9eff" stroke-width="1.5"/>
+        <text x="307" y="70" text-anchor="middle" fill="#7c9eff" font-size="9.5" font-family="sans-serif" font-weight="700" letter-spacing="0.05em">STAGE 2</text>
+        <text x="307" y="86" text-anchor="middle" fill="#e6edf3" font-size="10.5" font-family="sans-serif" font-weight="600">NER + Disambig.</text>
+        <text x="307" y="100" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">names / org codes</text>
+        <text x="307" y="112" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">context-aware</text>
+
+        <!-- arrow -->
+        <line x1="363" y1="85" x2="384" y2="85" stroke="#9aa7b4" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Stage 3 -->
+        <rect x="386" y="50" width="110" height="70" rx="7" fill="#151b23" stroke="#7c9eff" stroke-width="1.5"/>
+        <text x="441" y="70" text-anchor="middle" fill="#7c9eff" font-size="9.5" font-family="sans-serif" font-weight="700" letter-spacing="0.05em">STAGE 3</text>
+        <text x="441" y="86" text-anchor="middle" fill="#e6edf3" font-size="10.5" font-family="sans-serif" font-weight="600">AST Code IP</text>
+        <text x="441" y="100" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">proprietary code</text>
+        <text x="441" y="112" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">import fingerprint</text>
+
+        <!-- arrow -->
+        <line x1="497" y1="85" x2="518" y2="85" stroke="#9aa7b4" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Stage 4 -->
+        <rect x="520" y="50" width="110" height="70" rx="7" fill="#151b23" stroke="#7c9eff" stroke-width="1.5"/>
+        <text x="575" y="70" text-anchor="middle" fill="#7c9eff" font-size="9.5" font-family="sans-serif" font-weight="700" letter-spacing="0.05em">STAGE 4</text>
+        <text x="575" y="86" text-anchor="middle" fill="#e6edf3" font-size="10.5" font-family="sans-serif" font-weight="600">Semantic / KB</text>
+        <text x="575" y="100" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">TF-IDF similarity</text>
+        <text x="575" y="112" text-anchor="middle" fill="#9aa7b4" font-size="9" font-family="sans-serif">internal jargon</text>
+
+        <!-- arrow down to policy -->
+        <line x1="630" y1="85" x2="651" y2="85" stroke="#9aa7b4" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Policy engine -->
+        <rect x="653" y="60" width="43" height="50" rx="7" fill="#151b23" stroke="#4fd1c5" stroke-width="1.5"/>
+        <text x="675" y="80" text-anchor="middle" fill="#4fd1c5" font-size="8.5" font-family="sans-serif" font-weight="700">Policy</text>
+        <text x="675" y="93" text-anchor="middle" fill="#4fd1c5" font-size="8.5" font-family="sans-serif" font-weight="700">Engine</text>
+
+        <!-- Labels below stages -->
+        <text x="49" y="148" text-anchor="middle" fill="#4fd1c5" font-size="9" font-family="sans-serif">Enterprise</text>
+        <text x="49" y="159" text-anchor="middle" fill="#4fd1c5" font-size="9" font-family="sans-serif">Prompt</text>
+
+        <text x="675" y="148" text-anchor="middle" fill="#ff9999" font-size="9" font-family="sans-serif">ALLOW /</text>
+        <text x="675" y="159" text-anchor="middle" fill="#ff9999" font-size="9" font-family="sans-serif">REDACT</text>
+      </svg>
+    </div>
+
+    <!-- Stage detail cards -->
+    <div class="grid" style="margin-top:20px;">
+      <div class="card">
+        <h3><span class="stage-badge">1</span> Regex + Entropy (fast path)</h3>
+        <p>High-confidence structured secrets: API keys, private keys, JWT tokens, SSNs, credit cards, email addresses, and high-entropy opaque strings. Handles ~75% of sensitive prompts with sub-millisecond latency.</p>
+      </div>
+      <div class="card">
+        <h3><span class="stage-badge">2</span> NER + Disambiguation</h3>
+        <p>Named entity recognition with operational vs. exemplary disambiguation. Entities in hypothetical examples are suppressed; entities in action-verb contexts are escalated. Catches person names, org codes, and ticket IDs.</p>
+      </div>
+      <div class="card">
+        <h3><span class="stage-badge">3</span> AST Code IP Fingerprinting</h3>
+        <p>Parses embedded code blocks, analyzes import graphs and identifier patterns against an internal symbol corpus. Flags proprietary code fragments that neither regex nor NER can detect.</p>
+      </div>
+      <div class="card">
+        <h3><span class="stage-badge">4</span> Semantic / KB Similarity</h3>
+        <p>TF-IDF cosine similarity against an internal terminology knowledge base identifies domain-specific jargon and project codenames that appear innocuous to general NER models but carry confidential meaning.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════ WHY ═══════════════════════ -->
 <section id="why">
   <div class="wrap">
-    <h2>Why this matters</h2>
+    <h2>Why CADLP</h2>
     <p class="section-sub">
-      Shadow AI is the defining enterprise data risk of the current decade: employees using
-      consumer LLM tools inadvertently expose credentials, PII, proprietary code, and internal
-      operational context that organizations have no visibility into once it leaves the
-      network boundary. CADLP closes that gap without blocking the productivity gains of AI.
+      Shadow AI is the defining enterprise data risk of this decade: employees using consumer
+      LLM tools inadvertently expose credentials, PII, and proprietary code with no
+      organizational visibility once it leaves the network boundary.
     </p>
     <ul class="why-list">
-      <li><strong>Closes the Shadow AI exposure gap.</strong> A transparent proxy layer requires no change to employee workflow while intercepting every outbound prompt for sensitivity analysis, giving security teams visibility and control they cannot get from access policies alone.</li>
-      <li><strong>Detects what regex alone misses.</strong> The four-stage pipeline escalates from fast regex and entropy detection to NER disambiguation, AST-based code IP fingerprinting, and TF-IDF semantic similarity, catching internal terminology and proprietary logic that pattern-matching cannot identify.</li>
-      <li><strong>Preserves LLM utility after redaction.</strong> Typed, indexed placeholders (<code>[EMAIL_1]</code>, <code>[API_KEY_1]</code>, <code>[PERSON_A]</code>) replace sensitive spans while preserving prompt structure and referential consistency across multi-turn sessions, so redacted prompts still produce useful model outputs.</li>
-      <li><strong>Operationally aware disambiguation.</strong> Entities in hypothetical examples are suppressed; entities in action-verb contexts are escalated. This cuts false positives on training data and documentation while maintaining recall on live operational prompts.</li>
-      <li><strong>Audit-log safe by design.</strong> Only metadata is logged (entity types, action taken, timestamp); raw prompt content is never persisted, satisfying zero-retention requirements without sacrificing incident traceability.</li>
-      <li><strong>Open and independently verifiable.</strong> Apache 2.0-licensed reference implementation, 90 tests, and a SEPAD-10K sample benchmark are public so detection and redaction claims can be independently reproduced.</li>
+      <li><strong>Closes the Shadow AI exposure gap.</strong> A transparent proxy requires no change to employee workflow while intercepting every outbound prompt for sensitivity analysis.</li>
+      <li><strong>Detects what regex alone misses.</strong> The four-stage cascade catches internal terminology and proprietary logic that pattern-matching cannot identify.</li>
+      <li><strong>Preserves LLM utility after redaction.</strong> Typed, indexed placeholders (<code>[EMAIL_1]</code>, <code>[API_KEY_1]</code>) maintain referential consistency across multi-turn sessions so redacted prompts still produce useful outputs.</li>
+      <li><strong>Zero-retention audit logging.</strong> Only metadata is logged; raw prompt content is never persisted, satisfying compliance requirements without sacrificing traceability.</li>
+      <li><strong>Open and independently verifiable.</strong> Apache 2.0, 90 tests, and a SEPAD-10K benchmark sample so detection claims can be reproduced.</li>
     </ul>
   </div>
 </section>
 
-<section id="architecture">
-  <div class="wrap">
-    <h2>How it works</h2>
-    <p class="section-sub">The Contextual Sensitivity Classifier (CSC) runs four stages in sequence. Each stage emits a SensitivityMap that drives the Policy Engine, which selects ALLOW, REDACT, BLOCK, or QUARANTINE before the prompt reaches the LLM API.</p>
-    <div class="grid">
-      <div class="card">
-        <h3>Stage 1 &mdash; Regex + Entropy (fast path)</h3>
-        <p>High-confidence structured secrets: API keys, private keys, JWT tokens, SSNs, credit card numbers, email addresses, and high-entropy opaque strings. Handles 70-80% of sensitive prompts with sub-millisecond latency.</p>
-      </div>
-      <div class="card">
-        <h3>Stage 2 &mdash; NER + Disambiguation</h3>
-        <p>Named entity recognition with operational vs. exemplary disambiguation: entities appearing in hypothetical examples or documentation contexts are suppressed; entities in action-verb or imperative contexts are escalated. Catches person names, org codes, and ticket IDs that Stage 1 misses.</p>
-      </div>
-      <div class="card">
-        <h3>Stage 3 &mdash; AST Code IP Fingerprinting</h3>
-        <p>Parses code blocks embedded in prompts, analyzes import graphs and identifier naming patterns against an internal symbol corpus, and flags proprietary code fragments. Catches IP leakage that neither regex nor NER can detect.</p>
-      </div>
-      <div class="card">
-        <h3>Stage 4 &mdash; Semantic / KB Similarity</h3>
-        <p>TF-IDF cosine similarity against an internal terminology knowledge base identifies domain-specific jargon and internal project codenames that appear innocuous to general NER models but carry confidential meaning in context.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
+<!-- ═══════════════════════ COVERAGE ═══════════════════════ -->
 <section id="coverage">
   <div class="wrap">
     <h2>Detection coverage</h2>
     <p class="section-sub">Evaluated on the SEPAD-10K synthetic enterprise prompt benchmark.</p>
-    <table>
-      <thead><tr><th>Entity type</th><th>Stage</th><th>Method</th><th>Confidence</th></tr></thead>
-      <tbody>
-        <tr><td>API Keys (OpenAI, etc.)</td><td>1</td><td>Regex</td><td>0.95 &ndash; 0.99</td></tr>
-        <tr><td>Private Keys / JWTs</td><td>1</td><td>Regex</td><td>0.95 &ndash; 1.00</td></tr>
-        <tr><td>SSN / Credit Cards / Email</td><td>1</td><td>Regex</td><td>0.85 &ndash; 0.95</td></tr>
-        <tr><td>High-entropy Secrets</td><td>1</td><td>Shannon Entropy</td><td>variable</td></tr>
-        <tr><td>Person Names / Org Codes</td><td>2</td><td>NER + Disambiguation</td><td>0.60 &ndash; 0.95</td></tr>
-        <tr><td>Proprietary Code</td><td>3</td><td>AST + Import Analysis</td><td>variable</td></tr>
-        <tr><td>Internal Terminology</td><td>4</td><td>TF-IDF Similarity</td><td>variable</td></tr>
-      </tbody>
-    </table>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Entity type</th><th>Stage</th><th>Method</th><th>Confidence</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>API Keys (OpenAI, AWS, etc.)</td><td>1</td><td>Regex</td><td>0.95 &ndash; 0.99</td></tr>
+          <tr><td>Private Keys / JWTs</td><td>1</td><td>Regex</td><td>0.95 &ndash; 1.00</td></tr>
+          <tr><td>SSN / Credit Cards / Email</td><td>1</td><td>Regex</td><td>0.85 &ndash; 0.95</td></tr>
+          <tr><td>High-entropy Secrets</td><td>1</td><td>Shannon Entropy</td><td>variable</td></tr>
+          <tr><td>Person Names / Org Codes / Ticket IDs</td><td>2</td><td>NER + Disambiguation</td><td>0.60 &ndash; 0.95</td></tr>
+          <tr><td>Proprietary Code Fragments</td><td>3</td><td>AST + Import Analysis</td><td>variable</td></tr>
+          <tr><td>Internal Terminology / Codenames</td><td>4</td><td>TF-IDF Similarity</td><td>variable</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
 
+<!-- ═══════════════════════ QUICK START ═══════════════════════ -->
 <section id="start">
   <div class="wrap">
     <h2>Quick start</h2>
-    <p class="section-sub">Python 3.9+ required.</p>
+    <p class="section-sub">Python 3.9+ required. No external dependencies for the base install.</p>
     <pre><code>pip install cadlp
 
-# or with semantic similarity support
-pip install "cadlp[full]"
+from cadlp import ContextualSensitivityClassifier, UtilityPreservingRedactor
+from cadlp.policy.engine import PolicyEngine, Action
 
-# Scan a prompt from stdin
-echo "My API key is sk-abc123XYZ..." | cadlp scan
+csc    = ContextualSensitivityClassifier()
+upr    = UtilityPreservingRedactor()
+policy = PolicyEngine()
 
-# Run the built-in demo
-cadlp demo
+prompt   = "Please reset the password for alice@company.com. Her SSN is 234-56-7890."
+smap     = csc.classify(prompt)
+decision = policy.evaluate(smap)
 
-# Run evaluation on the SEPAD-10K sample
-cadlp eval --dataset data/sepad10k/sample.json</code></pre>
+if decision.action == Action.REDACT:
+    result = upr.redact(smap)
+    print(result.redacted_prompt)
+    # "Please reset the password for [EMAIL_1]. Her SSN is [SSN_1]."</code></pre>
   </div>
 </section>
 
+<!-- ═══════════════════════ CITATION ═══════════════════════ -->
 <section id="cite">
   <div class="wrap">
     <h2>Citation</h2>
     <div class="cite">
       Gentyala, S. (2026). <em>Contextual Sensitivity Classification and Utility-Preserving Redaction for Enterprise LLM Deployments.</em> IEEE ICIRCA 2026.
       <br>
-      <a href="https://ieeexplore.ieee.org/abstract/document/11570292">ieeexplore.ieee.org/abstract/document/11570292</a>
+      IEEE Xplore: <a href="https://ieeexplore.ieee.org/abstract/document/11570292">ieeexplore.ieee.org/abstract/document/11570292</a>
       <br><br>
       Reference implementation: <a href="https://github.com/sunilgentyala/cadlp">github.com/sunilgentyala/cadlp</a>
     </div>
   </div>
 </section>
 
+<!-- ═══════════════════════ FOOTER ═══════════════════════ -->
 <footer>
   <div class="wrap">
-    CADLP &middot; Apache 2.0 License &middot; Sunil Gentyala, HCLTECH (HCL America Inc.) &middot;
-    <a href="https://github.com/sunilgentyala/cadlp">GitHub</a>
+    <div class="footer-inner">
+      <!-- mini logo -->
+      <svg class="footer-logo" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="28" height="28" rx="6" fill="#151b23"/>
+        <path d="M14 3 L22 6.5 L22 14 C22 19.5 14 23.5 14 23.5 C14 23.5 6 19.5 6 14 L6 6.5 Z"
+              fill="rgba(124,158,255,0.1)" stroke="#7c9eff" stroke-width="1.2"/>
+        <rect x="10" y="14" width="8" height="6" rx="1.2" fill="rgba(124,158,255,0.25)" stroke="#7c9eff" stroke-width="1"/>
+        <path d="M11.5 14 L11.5 11.5 C11.5 9.6 12.6 8 14 8 C15.4 8 16.5 9.6 16.5 11.5 L16.5 14"
+              fill="none" stroke="#7c9eff" stroke-width="1.2" stroke-linecap="round"/>
+      </svg>
+      <span>CADLP &middot; Apache 2.0 &middot; Sunil Gentyala, HCLTECH (HCL America Inc.)</span>
+      <span style="margin-left:auto; display:flex; gap:16px;">
+        <a href="https://github.com/sunilgentyala/cadlp">GitHub</a>
+        <a href="https://ieeexplore.ieee.org/abstract/document/11570292">IEEE Xplore</a>
+        <a href="https://sunilgentyala.github.io">Portfolio</a>
+      </span>
+    </div>
   </div>
 </footer>
 

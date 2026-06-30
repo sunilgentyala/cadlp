@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CADLP | Context-Aware Data Loss Prevention for LLMs</title>
+<meta name="description" content="CADLP is an open-source proxy layer that intercepts, classifies, and redacts sensitive enterprise data before it reaches LLM APIs. Reference implementation for the published IEEE paper on Contextual Sensitivity Classification.">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg-alt: #11161d;
+    --card: #151b23;
+    --border: #232b35;
+    --text: #e6edf3;
+    --muted: #9aa7b4;
+    --accent: #7c9eff;
+    --accent-2: #4fd1c5;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  header.hero {
+    padding: 90px 0 60px;
+    background: radial-gradient(circle at 20% 20%, rgba(124,158,255,0.12), transparent 45%),
+                radial-gradient(circle at 80% 0%, rgba(79,209,197,0.10), transparent 40%);
+    border-bottom: 1px solid var(--border);
+  }
+  .eyebrow {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(124,158,255,0.4);
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 18px;
+  }
+  h1 { font-size: 2.6rem; margin: 0 0 14px; line-height: 1.15; }
+  h1 span { color: var(--accent); }
+  .lede { font-size: 1.15rem; color: var(--muted); max-width: 720px; margin: 0 0 30px; }
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn { display: inline-block; padding: 11px 20px; border-radius: 8px; font-weight: 600; font-size: 0.95rem; }
+  .btn-primary { background: var(--accent); color: #07101f; }
+  .btn-primary:hover { background: #9cb4ff; text-decoration: none; }
+  .btn-secondary { border: 1px solid var(--border); color: var(--text); }
+  .btn-secondary:hover { border-color: var(--accent); text-decoration: none; }
+
+  section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h2 { font-size: 1.6rem; margin: 0 0 10px; }
+  .section-sub { color: var(--muted); margin: 0 0 30px; max-width: 700px; }
+
+  .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 700px) { .grid, .grid-3 { grid-template-columns: 1fr; } }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
+  .card h3 { margin: 0 0 8px; font-size: 1.02rem; color: var(--text); }
+  .card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+  .stat { text-align: center; }
+  .stat .num { font-size: 2.1rem; font-weight: 700; color: var(--accent); }
+  .stat .label { color: var(--muted); font-size: 0.85rem; margin-top: 6px; }
+
+  .why-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .why-list li {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 18px;
+    color: var(--muted);
+  }
+  .why-list li strong { color: var(--text); }
+
+  pre {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    overflow-x: auto;
+    font-size: 0.82rem;
+    color: #c8d3dd;
+  }
+  code {
+    background: rgba(124,158,255,0.12);
+    color: var(--accent);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+  pre code { background: none; padding: 0; color: inherit; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  td { color: var(--muted); }
+  td:first-child, th:first-child { color: var(--text); }
+
+  .cite {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  footer { padding: 40px 0 60px; color: var(--muted); font-size: 0.85rem; }
+  footer a { color: var(--muted); }
+  footer a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Published &middot; IEEE ICIRCA 2026 &middot; IEEE Xplore</span>
+    <h1>Stop sensitive data from reaching <span>LLM APIs</span></h1>
+    <p class="lede">
+      CADLP is an open-source, research-grade proxy layer that intercepts prompts sent to
+      large language model APIs and detects, classifies, and redacts sensitive enterprise data
+      before it leaves the organization. Four-stage detection pipeline, zero-retention audit
+      logging, utility-preserving redaction.
+    </p>
+    <div class="btn-row">
+      <a class="btn btn-primary" href="https://github.com/sunilgentyala/cadlp">View on GitHub</a>
+      <a class="btn btn-secondary" href="https://ieeexplore.ieee.org/abstract/document/11570292">IEEE Xplore</a>
+    </div>
+  </div>
+</header>
+
+<section id="results">
+  <div class="wrap">
+    <div class="grid-3">
+      <div class="card stat">
+        <div class="num">4-stage</div>
+        <div class="label">detection pipeline: regex, NER, AST code analysis, semantic similarity</div>
+      </div>
+      <div class="card stat">
+        <div class="num">0 retention</div>
+        <div class="label">raw prompt content never persisted in audit logs</div>
+      </div>
+      <div class="card stat">
+        <div class="num">UPR</div>
+        <div class="label">utility-preserving redaction keeps prompt structure intact for LLMs</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <h2>Why this matters</h2>
+    <p class="section-sub">
+      Shadow AI is the defining enterprise data risk of the current decade: employees using
+      consumer LLM tools inadvertently expose credentials, PII, proprietary code, and internal
+      operational context that organizations have no visibility into once it leaves the
+      network boundary. CADLP closes that gap without blocking the productivity gains of AI.
+    </p>
+    <ul class="why-list">
+      <li><strong>Closes the Shadow AI exposure gap.</strong> A transparent proxy layer requires no change to employee workflow while intercepting every outbound prompt for sensitivity analysis, giving security teams visibility and control they cannot get from access policies alone.</li>
+      <li><strong>Detects what regex alone misses.</strong> The four-stage pipeline escalates from fast regex and entropy detection to NER disambiguation, AST-based code IP fingerprinting, and TF-IDF semantic similarity, catching internal terminology and proprietary logic that pattern-matching cannot identify.</li>
+      <li><strong>Preserves LLM utility after redaction.</strong> Typed, indexed placeholders (<code>[EMAIL_1]</code>, <code>[API_KEY_1]</code>, <code>[PERSON_A]</code>) replace sensitive spans while preserving prompt structure and referential consistency across multi-turn sessions, so redacted prompts still produce useful model outputs.</li>
+      <li><strong>Operationally aware disambiguation.</strong> Entities in hypothetical examples are suppressed; entities in action-verb contexts are escalated. This cuts false positives on training data and documentation while maintaining recall on live operational prompts.</li>
+      <li><strong>Audit-log safe by design.</strong> Only metadata is logged (entity types, action taken, timestamp); raw prompt content is never persisted, satisfying zero-retention requirements without sacrificing incident traceability.</li>
+      <li><strong>Open and independently verifiable.</strong> Apache 2.0-licensed reference implementation, 90 tests, and a SEPAD-10K sample benchmark are public so detection and redaction claims can be independently reproduced.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="architecture">
+  <div class="wrap">
+    <h2>How it works</h2>
+    <p class="section-sub">The Contextual Sensitivity Classifier (CSC) runs four stages in sequence. Each stage emits a SensitivityMap that drives the Policy Engine, which selects ALLOW, REDACT, BLOCK, or QUARANTINE before the prompt reaches the LLM API.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>Stage 1 &mdash; Regex + Entropy (fast path)</h3>
+        <p>High-confidence structured secrets: API keys, private keys, JWT tokens, SSNs, credit card numbers, email addresses, and high-entropy opaque strings. Handles 70-80% of sensitive prompts with sub-millisecond latency.</p>
+      </div>
+      <div class="card">
+        <h3>Stage 2 &mdash; NER + Disambiguation</h3>
+        <p>Named entity recognition with operational vs. exemplary disambiguation: entities appearing in hypothetical examples or documentation contexts are suppressed; entities in action-verb or imperative contexts are escalated. Catches person names, org codes, and ticket IDs that Stage 1 misses.</p>
+      </div>
+      <div class="card">
+        <h3>Stage 3 &mdash; AST Code IP Fingerprinting</h3>
+        <p>Parses code blocks embedded in prompts, analyzes import graphs and identifier naming patterns against an internal symbol corpus, and flags proprietary code fragments. Catches IP leakage that neither regex nor NER can detect.</p>
+      </div>
+      <div class="card">
+        <h3>Stage 4 &mdash; Semantic / KB Similarity</h3>
+        <p>TF-IDF cosine similarity against an internal terminology knowledge base identifies domain-specific jargon and internal project codenames that appear innocuous to general NER models but carry confidential meaning in context.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="coverage">
+  <div class="wrap">
+    <h2>Detection coverage</h2>
+    <p class="section-sub">Evaluated on the SEPAD-10K synthetic enterprise prompt benchmark.</p>
+    <table>
+      <thead><tr><th>Entity type</th><th>Stage</th><th>Method</th><th>Confidence</th></tr></thead>
+      <tbody>
+        <tr><td>API Keys (OpenAI, etc.)</td><td>1</td><td>Regex</td><td>0.95 &ndash; 0.99</td></tr>
+        <tr><td>Private Keys / JWTs</td><td>1</td><td>Regex</td><td>0.95 &ndash; 1.00</td></tr>
+        <tr><td>SSN / Credit Cards / Email</td><td>1</td><td>Regex</td><td>0.85 &ndash; 0.95</td></tr>
+        <tr><td>High-entropy Secrets</td><td>1</td><td>Shannon Entropy</td><td>variable</td></tr>
+        <tr><td>Person Names / Org Codes</td><td>2</td><td>NER + Disambiguation</td><td>0.60 &ndash; 0.95</td></tr>
+        <tr><td>Proprietary Code</td><td>3</td><td>AST + Import Analysis</td><td>variable</td></tr>
+        <tr><td>Internal Terminology</td><td>4</td><td>TF-IDF Similarity</td><td>variable</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="start">
+  <div class="wrap">
+    <h2>Quick start</h2>
+    <p class="section-sub">Python 3.9+ required.</p>
+    <pre><code>pip install cadlp
+
+# or with semantic similarity support
+pip install "cadlp[full]"
+
+# Scan a prompt from stdin
+echo "My API key is sk-abc123XYZ..." | cadlp scan
+
+# Run the built-in demo
+cadlp demo
+
+# Run evaluation on the SEPAD-10K sample
+cadlp eval --dataset data/sepad10k/sample.json</code></pre>
+  </div>
+</section>
+
+<section id="cite">
+  <div class="wrap">
+    <h2>Citation</h2>
+    <div class="cite">
+      Gentyala, S. (2026). <em>Contextual Sensitivity Classification and Utility-Preserving Redaction for Enterprise LLM Deployments.</em> IEEE ICIRCA 2026.
+      <br>
+      <a href="https://ieeexplore.ieee.org/abstract/document/11570292">ieeexplore.ieee.org/abstract/document/11570292</a>
+      <br><br>
+      Reference implementation: <a href="https://github.com/sunilgentyala/cadlp">github.com/sunilgentyala/cadlp</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    CADLP &middot; Apache 2.0 License &middot; Sunil Gentyala, HCLTECH (HCL America Inc.) &middot;
+    <a href="https://github.com/sunilgentyala/cadlp">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,12 +1,12 @@
 # CADLP: Context-Aware Data Loss Prevention Proxy for LLMs
 
-[![CI](https://github.com/sunilgentyala/cadlp/actions/workflows/ci.yml/badge.svg)](https://github.com/sunilgentyala/cadlp/actions/workflows/ci.yml)
+[![Paper](https://img.shields.io/badge/IEEE%20Xplore-Published-blue)](https://ieeexplore.ieee.org/abstract/document/11570292) [![CI](https://github.com/sunilgentyala/cadlp/actions/workflows/ci.yml/badge.svg)](https://github.com/sunilgentyala/cadlp/actions/workflows/ci.yml)
 [![Python](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
 
 CADLP is a research-grade, enterprise-ready proxy layer that intercepts prompts sent to large language model (LLM) APIs and detects, classifies, and redacts sensitive data before it leaves the organization. It addresses the **Shadow AI** problem: employees using unapproved consumer AI tools that inadvertently expose credentials, PII, proprietary code, or internal operational context.
 
-The system is described in full in the accompanying IEEE-style paper: *"Contextual Sensitivity Classification and Utility-Preserving Redaction for Enterprise LLM Deployments."*
+The system is described in full in the accompanying IEEE paper: *"Contextual Sensitivity Classification and Utility-Preserving Redaction for Enterprise LLM Deployments."* Published on [IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/11570292).
 
 ---
 
@@ -65,7 +65,7 @@ pip install cadlp
 pip install "cadlp[full]"
 
 # Development install
-git clone https://github.com/sugentyala/cadlp
+git clone https://github.com/sunilgentyala/cadlp
 cd cadlp
 pip install -e ".[dev]"
 ```
@@ -210,11 +210,18 @@ Apache License 2.0. See [LICENSE](LICENSE) for details.
 If you use CADLP in your research, please cite:
 
 ```
-@article{cadlp2025,
+@inproceedings{gentyala2026cadlp,
   title   = {Contextual Sensitivity Classification and Utility-Preserving Redaction
              for Enterprise LLM Deployments},
+<<<<<<< HEAD
   author  = {CADLP Research Team},
   year    = {2025},
   url     = {https://github.com/sunilgentyala/cadlp}
+=======
+  author  = {Gentyala, Sunil},
+  booktitle = {Proceedings of the IEEE ICIRCA 2026},
+  year    = {2026},
+  url     = {https://ieeexplore.ieee.org/abstract/document/11570292}
+>>>>>>> 9ff15fb (Add IEEE Xplore published link and GitHub Pages landing site)
 }
 ```

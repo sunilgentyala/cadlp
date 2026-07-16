@@ -6,7 +6,7 @@
 
 CADLP is a research-grade, enterprise-ready proxy layer that intercepts prompts sent to large language model (LLM) APIs and detects, classifies, and redacts sensitive data before it leaves the organization. It addresses the **Shadow AI** problem: employees using unapproved consumer AI tools that inadvertently expose credentials, PII, proprietary code, or internal operational context.
 
-The system is described in full in the accompanying IEEE paper: *"Contextual Sensitivity Classification and Utility-Preserving Redaction for Enterprise LLM Deployments."* Published on [IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/11570292).
+The system is described in full in the accompanying IEEE paper: *"A Multi-Stage NLP Framework for Enterprise Data Protection in Public LLM Interactions."* Published on [IEEE Xplore](https://ieeexplore.ieee.org/abstract/document/11570292).
 
 ---
 
@@ -211,17 +211,13 @@ If you use CADLP in your research, please cite:
 
 ```
 @inproceedings{gentyala2026cadlp,
-  title   = {Contextual Sensitivity Classification and Utility-Preserving Redaction
-             for Enterprise LLM Deployments},
-<<<<<<< HEAD
-  author  = {CADLP Research Team},
-  year    = {2025},
-  url     = {https://github.com/sunilgentyala/cadlp}
-=======
-  author  = {Gentyala, Sunil},
+  title     = {A Multi-Stage NLP Framework for Enterprise Data Protection
+               in Public LLM Interactions},
+  author    = {Gentyala, Sunil and Tejasri, Nimmagari and Mudusu, Sunil Kumar},
   booktitle = {Proceedings of the IEEE ICIRCA 2026},
-  year    = {2026},
-  url     = {https://ieeexplore.ieee.org/abstract/document/11570292}
->>>>>>> 9ff15fb (Add IEEE Xplore published link and GitHub Pages landing site)
+  pages     = {2057--2064},
+  year      = {2026},
+  doi       = {10.1109/icirca69024.2026.11570292},
+  url       = {https://ieeexplore.ieee.org/abstract/document/11570292}
 }
 ```

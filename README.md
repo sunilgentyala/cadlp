@@ -214,7 +214,9 @@ If you use CADLP in your research, please cite:
   title     = {A Multi-Stage NLP Framework for Enterprise Data Protection
                in Public LLM Interactions},
   author    = {Gentyala, Sunil and Tejasri, Nimmagari and Mudusu, Sunil Kumar},
-  booktitle = {Proceedings of the IEEE ICIRCA 2026},
+  booktitle = {2026 7th International Conference on Inventive Research in
+               Computing Applications (ICIRCA)},
+  publisher = {IEEE},
   pages     = {2057--2064},
   year      = {2026},
   doi       = {10.1109/icirca69024.2026.11570292},

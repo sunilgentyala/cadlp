@@ -1,0 +1,47 @@
+cff-version: 1.2.0
+message: If you use this software in your research, please cite it as below.
+type: software
+title: 'CADLP: Context-Aware Data Loss Prevention Proxy for LLM Interactions'
+version: 1.0.0
+date-released: '2026-04-17'
+authors:
+- family-names: Gentyala
+  given-names: Sunil
+  affiliation: HCLTech (HCL America Inc.), Dallas, TX, USA
+  orcid: https://orcid.org/0009-0005-2642-3479
+  email: sunil.gentyala@ieee.org
+repository-code: https://github.com/sunilgentyala/cadlp
+url: https://sunilgentyala.github.io/cadlp/
+license: Apache-2.0
+abstract: Context-aware DLP proxy that detects and redacts credentials, PII, and proprietary
+  code before prompts reach external LLM APIs. Reference implementation for the IEEE ICIRCA
+  2026 paper.
+keywords:
+- data-loss-prevention
+- llm-security
+- pii-redaction
+- nlp
+- enterprise-security
+preferred-citation:
+  type: conference-paper
+  title: A Multi-Stage NLP Framework for Enterprise Data Protection in Public LLM Interactions
+  authors:
+  - family-names: Gentyala
+    given-names: Sunil
+    affiliation: HCLTech (HCL America Inc.), Dallas, TX, USA
+    orcid: https://orcid.org/0009-0005-2642-3479
+    email: sunil.gentyala@ieee.org
+  - family-names: Tejasri
+    given-names: Nimmagari
+  - family-names: Mudusu
+    given-names: Sunil Kumar
+  collection-title: 2026 7th International Conference on Inventive Research in Computing Applications
+    (ICIRCA)
+  collection-type: proceedings
+  publisher:
+    name: IEEE
+  year: 2026
+  start: 2057
+  end: 2064
+  doi: 10.1109/ICIRCA69024.2026.11570292
+  url: https://doi.org/10.1109/ICIRCA69024.2026.11570292
